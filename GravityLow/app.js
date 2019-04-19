@@ -10,7 +10,7 @@ let g = ctx.createLinearGradient(0, 0, 0, canvas.height); //createlineargradient
 g.addColorStop(0, "#1C004D");
 g.addColorStop(1, "#1C004D");
 
-const accelarationScalingFactor = 0.001;
+const accelarationScalingFactor = 2; // controll the spead of the objects;
 
 const numberOfBalls = Math.floor((Math.random() + 0.3) * 6 + 1);
 const friction = 0.99;
@@ -46,7 +46,7 @@ class Mover {
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2, false);
     ctx.fillStyle = this.color;
-    ctx.shadowColor = "#FFC91F";
+    ctx.shadowColor = "#FFDA00";
     ctx.shadowBlur = 20;
     ctx.fill();
     ctx.closePath();
@@ -142,12 +142,16 @@ function sub(v1, v2) {
 
   vector.x = v1.x - v2.x;
   vector.y = v1.y - v2.y;
+  vector.x = vector.x / Math.abs(vector.x);
+  vector.y = vector.y / Math.abs(vector.y);
+  console.log(vector);
+  // its return the directon of the acceleration vector
   return vector;
 }
 
-function distance(x1, y1, x2, y2) {
-  const xdis = x2 - x1;
-  const ydis = y2 - y1;
+function distance(obj1, obj2) {
+  const xdis = obj2.x - obj1.x;
+  const ydis = obj2.y - obj1.y;
   return Math.sqrt(Math.pow(xdis, 2) + Math.pow(ydis, 2));
 }
 
@@ -182,15 +186,18 @@ window.toCartesian = toCartesian;
 
 function calcAcceloration(obj1, obj2) {
   const accelarationVector1 = sub(obj2, obj1); // THIS IS THE SUB VECTOR
-  const accelarationVector2 = sub(obj1, obj2);
-  const distance = dist(accelarationVector1);
 
-  const mass1 = Math.pow(obj1.r, 3) * 0.0001; // 10 px is mass of one kg
-  const mass2 = Math.pow(obj2.r, 3) * 0.0001;
+  const accelarationVector2 = sub(obj1, obj2);
+
+  const distance = dist(obj1, obj2);
+
+  const mass1 = Math.pow(obj1.r, 3) / 10000; // the distance is huge so /10000 is good
+  const mass2 = Math.pow(obj2.r, 3) / 10000;
   const gravityForce =
     (accelarationScalingFactor * mass1 * mass2) / Math.sqrt(distance, 2);
 
   if (distance > obj1.r + obj2.r) {
+    // put things together
     (obj1.accelaration.x += accelarationVector1.x * gravityForce),
       (obj1.accelaration.y += accelarationVector1.y * gravityForce),
       (obj2.accelaration.x += accelarationVector2.x * gravityForce),
